@@ -1,6 +1,13 @@
-def print_hi(name):
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+import customtkinter
+
+from main_ui import MainUI
+
+
+def main():
+    customtkinter.CTk()
+    app = MainUI()
+    app.mainloop()
 
 
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    main()
