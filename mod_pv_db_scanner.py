@@ -28,6 +28,7 @@ class ModPvDbScanner:
                     parts = line.strip().split("=")
                     song_name = parts[1]
                     is_commented_out = line.startswith("#")
+
                     song = Song(
                         song_name,
                         line_number,

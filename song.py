@@ -2,9 +2,7 @@ import linecache
 
 
 class Song:
-    def __init__(
-        self, name, line_number_en, line_number_jp, mod_pv_db_path, state, pack
-    ):
+    def __init__(self, name, line_number_en, line_number_jp, mod_pv_db_path, state, pack):
         self.name = name
         self.line_number_en = line_number_en
         self.line_number_jp = line_number_jp
