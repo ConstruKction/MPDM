@@ -67,6 +67,8 @@ class MainUI(customtkinter.CTk):
 
         for index, song in enumerate(songs):
             checkbox = customtkinter.CTkCheckBox(master=self.songs_checkbox_frame, text=f'{song[0]} - {song[1]}')
+            if song[2] == 1:
+                checkbox.select()
             checkbox.grid(row=index, column=0, pady=(0, 10), sticky='w')
 
     def clear_song_list(self):
