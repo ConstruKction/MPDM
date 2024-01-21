@@ -9,28 +9,41 @@ from mod_pv_db_scanner import ModPvDbScanner
 class MainUI(customtkinter.CTk):
     def __init__(self):
         super().__init__()
-        self.title('MPDM')
+        self.title("MPDM")
         self.geometry(self.set_window_size())
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(3, weight=1)
         self.directory_paths_list = []  # For ComboBox dropdown memory
 
-        # Path Entry and Browse Button
+        # Path ComboBox
         self.mod_directory_var = customtkinter.StringVar()
-        self.mod_directory_label = customtkinter.CTkLabel(self, text='Mod Directory Path', fg_color='transparent')
-        self.mod_directory_combobox = customtkinter.CTkComboBox(self, variable=self.mod_directory_var, values=[],
-                                                                command=lambda event=None:
-                                                                self.combobox_path_selected())
-        self.browse_button = customtkinter.CTkButton(self, text='Browse', command=self.browse_file)
+        self.mod_directory_label = customtkinter.CTkLabel(
+            self, text="Mod Directory Path", fg_color="transparent"
+        )
+        self.mod_directory_combobox = customtkinter.CTkComboBox(
+            self,
+            variable=self.mod_directory_var,
+            values=[],
+            command=lambda event=None: self.combobox_path_selected(),
+        )
 
-        # Song Checklist
+        # Browse Button
+        self.browse_button = customtkinter.CTkButton(
+            self, text="Browse", command=self.browse_file
+        )
+
+        # Song Checklist Frame
         self.songs_checkbox_frame = customtkinter.CTkScrollableFrame(master=self)
 
+        # Save Button
+        self.save_button = customtkinter.CTkButton(self, text="Save")
+
         # Grid Layout
-        self.mod_directory_label.grid(row=0, column=0, padx=20, pady=5, sticky='ew')
-        self.mod_directory_combobox.grid(row=1, column=0, padx=20, sticky='ew')
-        self.browse_button.grid(row=2, column=0, padx=20, pady=5, sticky='ew')
-        self.songs_checkbox_frame.grid(row=3, column=0, padx=20, pady=20, sticky='nsew')
+        self.mod_directory_label.grid(row=0, column=0, padx=20, pady=5, sticky="ew")
+        self.mod_directory_combobox.grid(row=1, column=0, padx=20, sticky="ew")
+        self.browse_button.grid(row=2, column=0, padx=20, pady=5, sticky="ew")
+        self.songs_checkbox_frame.grid(row=3, column=0, padx=20, pady=5, sticky="nsew")
+        self.save_button.grid(row=4, column=0, padx=20, pady=5, sticky="ew")
 
     def set_window_size(self) -> str:
         screen_width = self.winfo_screenwidth()
@@ -40,7 +53,7 @@ class MainUI(customtkinter.CTk):
         width = (screen_width * width_percent) // 100
         height = (screen_height * height_percent) // 100
 
-        return f'{width}x{height}+{screen_width // 2 - width // 2}+{screen_height // 2 - height // 2}'
+        return f"{width}x{height}+{screen_width // 2 - width // 2}+{screen_height // 2 - height // 2}"
 
     def combobox_path_selected(self):
         selected_path = self.mod_directory_combobox.get()
@@ -66,10 +79,18 @@ class MainUI(customtkinter.CTk):
         songs = mod_pv_db_scanner.get_all_songs()
 
         for index, song in enumerate(songs):
-            checkbox = customtkinter.CTkCheckBox(master=self.songs_checkbox_frame, text=f'{song[0]} - {song[1]}')
+            checkbox_var = customtkinter.IntVar(value=song[2])
+            checkbox = customtkinter.CTkCheckBox(
+                master=self.songs_checkbox_frame,
+                text=f"{song[0]} - {song[1]}",
+                variable=checkbox_var,
+                command=lambda v=checkbox_var, s=song: self.checkbox_toggled(v, s),
+            )
+
             if song[2] == 1:
                 checkbox.select()
-            checkbox.grid(row=index, column=0, pady=(0, 10), sticky='w')
+
+            checkbox.grid(row=index, column=0, pady=(0, 10), sticky="w")
 
     def clear_song_list(self):
         for widget in self.songs_checkbox_frame.winfo_children():
@@ -79,3 +100,8 @@ class MainUI(customtkinter.CTk):
         mod_directory = Path(self.mod_directory_var.get())
         if mod_directory.exists():
             self.update_song_list()
+
+    @staticmethod
+    def checkbox_toggled(checkbox_var, song):
+        checkbox_state = checkbox_var.get()
+        print(f"Checkbox for {song[0]} - {song[1]} toggled. State: {checkbox_state}")

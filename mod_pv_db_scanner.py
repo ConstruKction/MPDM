@@ -8,7 +8,7 @@ class ModPvDbScanner:
     def __init__(self, root_folder: str):
         self.root_folder = Path(root_folder)
 
-    def get_all_songs(self) -> list[tuple[str, str, int]]:
+    def get_all_songs(self) -> list[tuple[str, str, int, int]]:
         all_songs = []
 
         for mod_pv_db_path in self.root_folder.rglob("**/mod_pv_db.txt"):
@@ -20,22 +20,22 @@ class ModPvDbScanner:
                 Path(f"{mod_pv_db_path.parents[1]}/config.toml")
             )
 
-            for song, is_enabled in songs_in_pack:
-                song_tuple = (song, song_pack, is_enabled)
+            for song, is_enabled, line_number in songs_in_pack:
+                song_tuple = (song, song_pack, is_enabled, line_number)
                 all_songs.append(song_tuple)
 
         return all_songs
 
     @staticmethod
-    def read_song_names(mod_pv_db_path: Path) -> list[tuple[str, int]]:
+    def read_song_names(mod_pv_db_path: Path) -> list[tuple[str, int, int]]:
         song_names = set()
         with mod_pv_db_path.open("r", encoding="utf-8") as f:
-            for line in f:
+            for line_number, line in enumerate(f, start=1):
                 if "song_name_en" in line:
                     parts = line.strip().split("=")
                     song_name = parts[1]
                     is_commented_out = line.startswith("#")
-                    song_names.add((song_name, 0 if is_commented_out else 1))
+                    song_names.add((song_name, 0 if is_commented_out else 1, line_number))
 
         return sorted(list(song_names), key=lambda x: x[0])
 
