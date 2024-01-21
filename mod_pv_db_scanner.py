@@ -3,41 +3,44 @@ from typing import Optional
 
 import toml
 
+from song import Song
+
 
 class ModPvDbScanner:
     def __init__(self, root_folder: str):
         self.root_folder = Path(root_folder)
 
-    def get_all_songs(self) -> list[tuple[str, str, int, int]]:
+    def get_all_songs(self) -> list[Song]:
         all_songs = []
-
         for mod_pv_db_path in self.root_folder.rglob("**/mod_pv_db.txt"):
             if not self.has_script_folder(mod_pv_db_path.parent):
                 continue
 
-            songs_in_pack = self.read_song_names(mod_pv_db_path)
-            song_pack = self.get_song_pack_name(
-                Path(f"{mod_pv_db_path.parents[1]}/config.toml")
-            )
-
-            for song, is_enabled, line_number in songs_in_pack:
-                song_tuple = (song, song_pack, is_enabled, line_number)
-                all_songs.append(song_tuple)
+            all_songs = self.create_song_objects(mod_pv_db_path)
 
         return all_songs
 
-    @staticmethod
-    def read_song_names(mod_pv_db_path: Path) -> list[tuple[str, int, int]]:
-        song_names = set()
+    def create_song_objects(self, mod_pv_db_path: Path) -> list[Song]:
+        song_list = []
         with mod_pv_db_path.open("r", encoding="utf-8") as f:
             for line_number, line in enumerate(f, start=1):
                 if "song_name_en" in line:
                     parts = line.strip().split("=")
                     song_name = parts[1]
                     is_commented_out = line.startswith("#")
-                    song_names.add((song_name, 0 if is_commented_out else 1, line_number))
+                    song = Song(
+                        song_name,
+                        line_number,
+                        line_number - 1,
+                        mod_pv_db_path,
+                        0 if is_commented_out else 1,
+                        self.get_song_pack_name(
+                            Path(f"{mod_pv_db_path.parents[1]}/config.toml")
+                        ),
+                    )
+                    song_list.append(song)
 
-        return sorted(list(song_names), key=lambda x: x[0])
+        return song_list
 
     @staticmethod
     def has_script_folder(directory: Path) -> bool:

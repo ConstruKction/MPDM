@@ -79,15 +79,15 @@ class MainUI(customtkinter.CTk):
         songs = mod_pv_db_scanner.get_all_songs()
 
         for index, song in enumerate(songs):
-            checkbox_var = customtkinter.IntVar(value=song[2])
+            checkbox_var = customtkinter.IntVar(value=song.state)
             checkbox = customtkinter.CTkCheckBox(
                 master=self.songs_checkbox_frame,
-                text=f"{song[0]} - {song[1]}",
+                text=f"{song.name} - {song.pack}",
                 variable=checkbox_var,
                 command=lambda v=checkbox_var, s=song: self.checkbox_toggled(v, s),
             )
 
-            if song[2] == 1:
+            if song.state == 1:
                 checkbox.select()
 
             checkbox.grid(row=index, column=0, pady=(0, 10), sticky="w")
@@ -104,4 +104,10 @@ class MainUI(customtkinter.CTk):
     @staticmethod
     def checkbox_toggled(checkbox_var, song):
         checkbox_state = checkbox_var.get()
-        print(f"Checkbox for {song[0]} - {song[1]} toggled. State: {checkbox_state}")
+        song.state = checkbox_state
+        print(f"Checkbox for {song.name} - {song.pack} toggled. "
+              f"Checkbox State: {checkbox_state}, Song Object OLD State: {song.state}")
+
+        song.update_state()
+
+        print(f"Song Object NEW State: {song.state}")
