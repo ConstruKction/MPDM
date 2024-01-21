@@ -32,7 +32,7 @@ class MainUI(customtkinter.CTk):
         self.browse_button.grid(row=2, column=0, padx=20, pady=5, sticky='ew')
         self.songs_checkbox_frame.grid(row=3, column=0, padx=20, pady=20, sticky='nsew')
 
-    def set_window_size(self):
+    def set_window_size(self) -> str:
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
         width_percent = 40
