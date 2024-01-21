@@ -16,7 +16,7 @@ class ModPvDbScanner:
             if not self.has_script_folder(mod_pv_db_path.parent):
                 continue
 
-            all_songs = self.create_song_objects(mod_pv_db_path)
+            all_songs.extend(self.create_song_objects(mod_pv_db_path))
 
         return all_songs
 

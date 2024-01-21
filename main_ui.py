@@ -35,15 +35,11 @@ class MainUI(customtkinter.CTk):
         # Song Checklist Frame
         self.songs_checkbox_frame = customtkinter.CTkScrollableFrame(master=self)
 
-        # Save Button
-        self.save_button = customtkinter.CTkButton(self, text="Save")
-
         # Grid Layout
         self.mod_directory_label.grid(row=0, column=0, padx=20, pady=5, sticky="ew")
         self.mod_directory_combobox.grid(row=1, column=0, padx=20, sticky="ew")
         self.browse_button.grid(row=2, column=0, padx=20, pady=5, sticky="ew")
         self.songs_checkbox_frame.grid(row=3, column=0, padx=20, pady=5, sticky="nsew")
-        self.save_button.grid(row=4, column=0, padx=20, pady=5, sticky="ew")
 
     def set_window_size(self) -> str:
         screen_width = self.winfo_screenwidth()
@@ -105,9 +101,4 @@ class MainUI(customtkinter.CTk):
     def checkbox_toggled(checkbox_var, song):
         checkbox_state = checkbox_var.get()
         song.state = checkbox_state
-        print(f"Checkbox for {song.name} - {song.pack} toggled. "
-              f"Checkbox State: {checkbox_state}, Song Object OLD State: {song.state}")
-
         song.update_state()
-
-        print(f"Song Object NEW State: {song.state}")
