@@ -32,7 +32,7 @@ class ModPvDbScanner:
                     song = Song(
                         song_name,
                         line_number,
-                        line_number - 1,
+                        line_number - 1,  # TODO: This has to be less cringe
                         mod_pv_db_path,
                         0 if is_commented_out else 1,
                         self.get_song_pack_name(
