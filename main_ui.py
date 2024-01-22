@@ -24,7 +24,7 @@ class MainUI(customtkinter.CTk):
             self,
             variable=self.mod_directory_var,
             values=[],
-            command=lambda event=None: self.combobox_path_selected(),
+            command=lambda event=None: self.combobox_path_selected()
         )
 
         # Browse Button
@@ -32,14 +32,23 @@ class MainUI(customtkinter.CTk):
             self, text="Browse", command=self.browse_file
         )
 
+        # Song Pack Filter OptionMenu
+        self.song_pack_filter_var = customtkinter.StringVar()
+        self.song_pack_filter_optionmenu = customtkinter.CTkOptionMenu(
+            self,
+            variable=self.song_pack_filter_var,
+            values=[]
+        )
+
         # Song Checklist Frame
         self.songs_checkbox_frame = customtkinter.CTkScrollableFrame(master=self)
 
         # Grid Layout
-        self.mod_directory_label.grid(row=0, column=0, padx=20, pady=5, sticky="ew")
-        self.mod_directory_combobox.grid(row=1, column=0, padx=20, sticky="ew")
-        self.browse_button.grid(row=2, column=0, padx=20, pady=5, sticky="ew")
-        self.songs_checkbox_frame.grid(row=3, column=0, padx=20, pady=5, sticky="nsew")
+        self.mod_directory_label.grid(row=0, column=0, padx=20, pady=(5, 0), sticky="ew")
+        self.mod_directory_combobox.grid(row=1, column=0, padx=(20, 2.5), sticky="ew")
+        self.browse_button.grid(row=1, column=1, padx=(2.5, 20), pady=5, sticky="ew")
+        self.song_pack_filter_optionmenu.grid(row=2, column=0, columnspan=2, padx=20, pady=5, sticky="ew")
+        self.songs_checkbox_frame.grid(row=3, column=0, columnspan=2, padx=20, pady=(5, 20), sticky="nsew")
 
     def set_window_size(self) -> str:
         screen_width = self.winfo_screenwidth()
@@ -77,6 +86,8 @@ class MainUI(customtkinter.CTk):
         mod_pv_db_scanner = ModPvDbScanner(self.mod_directory_var.get())
         songs = mod_pv_db_scanner.get_all_songs()
 
+        song_packs = set()
+
         for index, song in enumerate(songs):
             checkbox_var = customtkinter.IntVar(value=song.state)
             checkbox = customtkinter.CTkCheckBox(
@@ -90,6 +101,10 @@ class MainUI(customtkinter.CTk):
                 checkbox.select()
 
             checkbox.grid(row=index, column=0, pady=(0, 10), sticky="w")
+
+            song_packs.add(song.pack)
+
+        self.song_pack_filter_optionmenu.configure(values=["[ ALL SONGS ]"] + list(song_packs))
 
     def clear_song_list(self):
         for widget in self.songs_checkbox_frame.winfo_children():
