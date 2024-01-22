@@ -1,8 +1,17 @@
 import linecache
+from pathlib import Path
 
 
 class Song:
-    def __init__(self, name, line_number_en, line_number_jp, mod_pv_db_path, state, pack):
+    def __init__(
+        self,
+        name: str,
+        line_number_en: int,
+        line_number_jp: int,
+        mod_pv_db_path: Path,
+        state: int,
+        pack: str,
+    ):
         self.name = name
         self.line_number_en = line_number_en
         self.line_number_jp = line_number_jp
