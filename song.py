@@ -5,13 +5,15 @@ from pathlib import Path
 class Song:
     def __init__(
         self,
+        pv_id: str,
         name: str,
         line_number_en: int,
         line_number_jp: int,
         mod_pv_db_path: Path,
         state: int,
-        pack: str,
+        pack: str
     ):
+        self.pv_id = pv_id
         self.name = name
         self.line_number_en = line_number_en
         self.line_number_jp = line_number_jp
