@@ -67,6 +67,9 @@ class MainUI(customtkinter.CTk):
                 self.directory_paths_list.append(directory_path)
                 self.mod_directory_combobox.configure(values=self.directory_paths_list)
 
+            if directory_path == "":
+                quit()
+
             self.submit_mod_directory()
 
     def update_song_list(self):
