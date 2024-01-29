@@ -91,6 +91,7 @@ class MainUI(customtkinter.CTk):
 
             self.submit_mod_directory()
 
+    # noinspection PyUnusedLocal
     def update_scrollable_song_frame(self, *args):
         self.clear_song_list_frame()
         mod_pv_db_scanner = ModPvDbScanner(self.mod_directory_var.get())
@@ -137,7 +138,7 @@ class MainUI(customtkinter.CTk):
             self.song_pack_filter_optionmenu_populated = True
 
         #  TODO: Find a way to un-cringe this (using protected field)
-        self.songs_checkbox_frame.parent_canvas.yview_moveto(0)
+        self.songs_checkbox_frame._parent_canvas.yview_moveto(0)
 
     def populate_song_pack_option_menu(self, song_packs):
         self.song_pack_filter_optionmenu.configure(
