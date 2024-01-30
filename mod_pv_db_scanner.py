@@ -1,4 +1,5 @@
 import re
+import concurrent.futures
 
 from pathlib import Path
 from typing import Optional
@@ -16,13 +17,22 @@ class ModPvDbScanner:
 
     def get_all_songs(self) -> list[Song]:
         all_songs = []
-        for mod_pv_db_path in self.root_folder.rglob("**/mod_pv_db.txt"):
-            if not self.has_script_folder(mod_pv_db_path.parent):
-                continue
 
-            all_songs.extend(self.create_song_objects(mod_pv_db_path))
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = [executor.submit(self.process_mod_pv_db, mod_pv_db_path)
+                       for mod_pv_db_path in self.root_folder.rglob("**/mod_pv_db.txt")]
+
+            for future in concurrent.futures.as_completed(futures):
+                song_list = future.result()
+                all_songs.extend(song_list)
 
         return all_songs
+
+    def process_mod_pv_db(self, mod_pv_db_path: Path) -> list[Song]:
+        if not self.has_script_folder(mod_pv_db_path.parent):
+            return []
+
+        return self.create_song_objects(mod_pv_db_path)
 
     def create_song_objects(self, mod_pv_db_path: Path) -> list[Song]:
         song_list = []

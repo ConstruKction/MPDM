@@ -1,3 +1,5 @@
+import threading
+
 import customtkinter
 
 from main_ui import MainUI
@@ -10,4 +12,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    threading.Thread(main()).start()
