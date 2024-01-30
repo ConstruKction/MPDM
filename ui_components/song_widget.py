@@ -1,9 +1,11 @@
+import customtkinter
 from tkinter import IntVar
 from typing import Any, Callable, Optional
 
-from customtkinter import CTkCheckBox, CTkLabel
+from customtkinter import CTkCheckBox, CTkLabel, StringVar
 
 from song import Song
+
 
 class SongWidget:
     def __init__(self, master: Any, song: Song, checkbox_var: Optional[IntVar], checkbox_command: Optional[Callable]):
@@ -19,13 +21,11 @@ class SongWidget:
             master=master,
             text=song.pack
         )
+        self.checkbox.select() if song.state else 0
 
     def show(self, row: int, column: int):
         self.checkbox.grid(row=row, column=column, padx=(0, 5), pady=(0, 5), sticky="w")
         self.song_pack_label.grid(row=row, column=column + 1, padx=(5, 0), pady=(0, 5), sticky="w")
-
-    def check(self):
-        self.checkbox.select()
 
     def hide(self):
         self.checkbox.grid_forget()

@@ -22,5 +22,5 @@ class ProgressBar:
         self.progress_bar.set(floor(self.current_progress * 1000) / 1000)
 
     @staticmethod
-    def set_width(window_width) -> int:
+    def set_width(window_width: int) -> int:
         return (window_width * 100) // 100

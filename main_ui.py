@@ -1,11 +1,13 @@
 from pathlib import Path
-from tkinter import filedialog
+from tkinter import filedialog, IntVar
 
 import customtkinter
 
 from mod_pv_db_scanner import ModPvDbScanner
-from ui_components.song_widget import SongWidget
+from song import Song
+from song_filter import SongFilter
 from ui_components.progress_bar import ProgressBar
+from ui_components.song_widget import SongWidget
 
 
 class MainUI(customtkinter.CTk):
@@ -16,7 +18,7 @@ class MainUI(customtkinter.CTk):
         self.grid_columnconfigure(0, weight=1)
         self.directory_paths_list = []  # For ComboBox dropdown memory
         self.song_widgets = []
-        self.song_pack_filter_optionmenu_populated = False
+        self.hidden_widgets = False
 
         # Path ComboBox
         self.mod_directory_var = customtkinter.StringVar()
@@ -29,7 +31,7 @@ class MainUI(customtkinter.CTk):
 
         # Song Search Bar
         self.search_bar_var = customtkinter.StringVar()
-        self.search_bar_var.trace_variable("w", self.update_scrollable_song_frame)
+        self.search_bar_var.trace_variable("w", self.create_song_widgets)
         self.search_bar = customtkinter.CTkEntry(self, placeholder_text="Search", textvariable=self.search_bar_var)
         self.search_bar.bind("<KeyRelease>", self.dynamic_search)
 
@@ -44,7 +46,7 @@ class MainUI(customtkinter.CTk):
         self.song_pack_filter_optionmenu = customtkinter.CTkOptionMenu(
             self, variable=self.song_pack_filter_var, values=[]
         )
-        self.song_pack_filter_var.trace_variable("w", self.update_scrollable_song_frame)
+        self.song_pack_filter_var.trace_variable("w", self.filter_song_widgets_by_song_pack)
 
         # Song Checklist Frame
         self.songs_checkbox_frame = customtkinter.CTkScrollableFrame(master=self)
@@ -109,82 +111,81 @@ class MainUI(customtkinter.CTk):
             self.submit_mod_directory()
 
     # noinspection PyUnusedLocal
-    def update_scrollable_song_frame(self, *args):
-        self.clear_song_list_frame()
-
+    def create_song_widgets(self, *args):
         mod_pv_db_scanner = ModPvDbScanner(self.mod_directory_var.get())
         songs = mod_pv_db_scanner.get_all_songs()
 
         song_packs = set()
         selected_pack = self.song_pack_filter_var.get()
 
-        populate_option_menu = not self.song_pack_filter_optionmenu_populated
-
         progress_bar = ProgressBar(self.bottom_bar_frame, len(songs), self.winfo_width())
 
-        search_text = self.search_bar.get().lower()
-
         for index, song in enumerate(songs):
-            if not self.song_pack_filter_optionmenu_populated:
-                song_packs.add(song.pack)
+            checkbox_var = customtkinter.IntVar(value=song.state)
+            song_widget = SongWidget(
+                self.songs_checkbox_frame,
+                song,
+                checkbox_var,
+                lambda v=checkbox_var, s=song: self.checkbox_toggled(v, s),
+            )
+            song_widget.show(index, 0)
 
-            if search_text.lower() not in song.name.lower():
-                continue
+            song_packs.add(song.pack)
+            self.song_widgets.append(song_widget)
 
-            if selected_pack == "All" or song.pack == selected_pack:
-                checkbox_var = customtkinter.IntVar(value=song.state)
-                song_widget = SongWidget(
-                    self.songs_checkbox_frame,
-                    song,
-                    checkbox_var,
-                    lambda v=checkbox_var, s=song: self.checkbox_toggled(v, s),
-                )
-                song_widget.show(index, 0)
+            progress_bar.update()
+            self.update_idletasks()
 
-                if song.state == 1:
-                    song_widget.check()
-
-                song_packs.add(song.pack)
-                self.song_widgets.append(song_widget)
-
-                progress_bar.update()
-                self.update_idletasks()
-            else:
-                song_widget = SongWidget(self.songs_checkbox_frame, song, None, None)
-                song_widget.hide()
-
-        progress_bar.update()
-        if populate_option_menu:
-            self.populate_song_pack_option_menu(song_packs)
-            self.song_pack_filter_optionmenu_populated = True
-
-        self.update_idletasks()
+        self.populate_song_pack_option_menu(song_packs)
 
         #  TODO: Find a way to un-cringe this (using protected field)
         self.songs_checkbox_frame._parent_canvas.yview_moveto(0)
 
-    def populate_song_pack_option_menu(self, song_packs):
+    # noinspection PyUnusedLocal
+    def filter_song_widgets_by_song_pack(self, *args):
+        selected_pack = self.song_pack_filter_var.get()
+
+        if self.hidden_widgets:
+            for index, song_widget in enumerate(self.song_widgets):
+                song_widget.show(index, 0)
+
+            self.hidden_widgets = False
+
+        if selected_pack != "All":
+            song_filter = SongFilter()
+            filtered_song_widgets = song_filter.filter_out_song_pack(self.song_widgets, selected_pack)
+
+            for song_widget in filtered_song_widgets:
+                song_widget.hide()
+
+            self.hidden_widgets = True
+
+        #  TODO: Find a way to un-cringe this (using protected field)
+        self.songs_checkbox_frame._parent_canvas.yview_moveto(0)
+
+    def populate_song_pack_option_menu(self, song_packs: set[str]):
         self.song_pack_filter_optionmenu.configure(
             values=["All"] + sorted(list(song_packs))
         )
 
-    def clear_song_list_frame(self):
+    def destroy_song_widgets(self):
         for song_widget in self.song_widgets:
             if song_widget:
-                song_widget.hide()
+                song_widget.remove()
 
         self.song_widgets = []
 
     def submit_mod_directory(self):
         mod_directory = Path(self.mod_directory_var.get())
         if mod_directory.exists():
-            self.update_scrollable_song_frame()
+            self.destroy_song_widgets()
+            self.create_song_widgets()
 
     @staticmethod
-    def checkbox_toggled(checkbox_var, song):
+    def checkbox_toggled(checkbox_var: IntVar, song: Song):
         checkbox_state = checkbox_var.get()
         song.state = checkbox_state
         song.update_state()
 
     def dynamic_search(self, event):
-        self.update_scrollable_song_frame()
+        self.filter_song_widgets_by_song_pack()
