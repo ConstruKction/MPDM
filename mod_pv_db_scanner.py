@@ -2,13 +2,12 @@ import re
 import concurrent.futures
 
 from pathlib import Path
-from typing import Optional
 
 import toml
 
 from song import Song
 
-PV_ID_RE = re.compile(r'(pv_\d+)')
+PV_ID_RE = re.compile(r"(pv_\d+)")
 
 
 class ModPvDbScanner:
@@ -19,8 +18,10 @@ class ModPvDbScanner:
         all_songs = []
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = [executor.submit(self.process_mod_pv_db, mod_pv_db_path)
-                       for mod_pv_db_path in self.root_folder.rglob("**/mod_pv_db.txt")]
+            futures = [
+                executor.submit(self.process_mod_pv_db, mod_pv_db_path)
+                for mod_pv_db_path in self.root_folder.rglob("**/mod_pv_db.txt")
+            ]
 
             for future in concurrent.futures.as_completed(futures):
                 song_list = future.result()
@@ -53,7 +54,7 @@ class ModPvDbScanner:
                         0 if is_commented_out else 1,
                         self.get_song_pack_name(
                             Path(f"{mod_pv_db_path.parents[1]}/config.toml")
-                        )
+                        ),
                     )
                     song_list.append(song)
 
@@ -65,7 +66,7 @@ class ModPvDbScanner:
         return script_directory_path.exists()
 
     @staticmethod
-    def get_song_pack_name(config_path: Path) -> Optional[str]:
+    def get_song_pack_name(config_path: Path) -> str:
         try:
             with config_path.open("r", encoding="utf-8") as f:
                 config_data = toml.load(f)
@@ -75,4 +76,4 @@ class ModPvDbScanner:
                     else config_path.parent.name
                 )
         except (FileNotFoundError, toml.TomlDecodeError):
-            return None
+            return "!UnknownMod!"
