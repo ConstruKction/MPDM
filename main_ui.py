@@ -189,6 +189,9 @@ class MainUI(CTk):
             else:
                 song_widget.hide()
 
+        #  TODO: Find a way to un-cringe this (using protected field)
+        self.songs_checkbox_frame._parent_canvas.yview_moveto(0)
+
     def populate_song_pack_option_menu(self, song_packs: set[str]):
         self.song_pack_filter_optionmenu.configure(
             values=["All"] + sorted(list(song_packs))
