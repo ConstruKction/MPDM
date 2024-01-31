@@ -1,3 +1,6 @@
+from pathlib import Path
+from tkinter import filedialog
+
 from customtkinter import (
     CTk,
     IntVar,
@@ -15,7 +18,6 @@ from song import Song
 from song_filter import SongFilter
 from ui_components.progress_bar import ProgressBar
 from ui_components.song_widget import SongWidget
-from ui_components.file_browser import FileBrowser
 
 
 class MainUI(CTk):
@@ -27,7 +29,6 @@ class MainUI(CTk):
         self.directory_paths_list = []
         self.song_widgets = []
         self.hidden_widgets = False
-        self.file_browser = FileBrowser(self)
 
         # Path ComboBox
         self.mod_directory_var = StringVar()
@@ -43,9 +44,7 @@ class MainUI(CTk):
         self.search_bar.bind("<KeyRelease>", self.filter_song_widgets_by_search_term)
 
         # Browse Button
-        self.browse_button = CTkButton(
-            self, text="Browse", command=self.file_browser.browse_file
-        )
+        self.browse_button = CTkButton(self, text="Browse", command=self.browse_file)
 
         # Song Pack Filter OptionMenu
         self.song_pack_filter_var = StringVar()
@@ -102,7 +101,22 @@ class MainUI(CTk):
         selected_path = self.mod_directory_combobox.get()
         if selected_path:
             self.mod_directory_var.set(selected_path)
-            self.file_browser.submit_mod_directory()
+            self.submit_mod_directory()
+
+    def browse_file(self):
+        directory_path = filedialog.askdirectory()
+        if directory_path:
+            self.mod_directory_var.set(directory_path)
+            self.mod_directory_combobox.set(directory_path)
+
+            if directory_path not in self.directory_paths_list:
+                self.directory_paths_list.append(directory_path)
+                self.mod_directory_combobox.configure(values=self.directory_paths_list)
+
+            if directory_path == "":
+                quit()
+
+            self.submit_mod_directory()
 
     def create_song_widgets(self, *_args):
         mod_pv_db_scanner = ModPvDbScanner(self.mod_directory_var.get())
@@ -189,6 +203,12 @@ class MainUI(CTk):
                 song_widget.remove()
 
         self.song_widgets = []
+
+    def submit_mod_directory(self):
+        mod_directory = Path(self.mod_directory_var.get())
+        if mod_directory.exists():
+            self.destroy_song_widgets()
+            self.create_song_widgets()
 
     @staticmethod
     def checkbox_toggled(checkbox_var: IntVar, song: Song):
