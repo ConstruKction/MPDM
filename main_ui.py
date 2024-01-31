@@ -30,10 +30,8 @@ class MainUI(customtkinter.CTk):
         )
 
         # Song Search Bar
-        self.search_bar_var = customtkinter.StringVar()
-        self.search_bar_var.trace_variable("w", self.create_song_widgets)
-        self.search_bar = customtkinter.CTkEntry(self, placeholder_text="Search", textvariable=self.search_bar_var)
-        self.search_bar.bind("<KeyRelease>", self.dynamic_search)
+        self.search_bar = customtkinter.CTkEntry(self, placeholder_text="Search")
+        self.search_bar.bind("<KeyRelease>", self.filter_song_widgets_by_search_term)
 
         # Browse Button
         self.browse_button = customtkinter.CTkButton(
@@ -110,13 +108,11 @@ class MainUI(customtkinter.CTk):
 
             self.submit_mod_directory()
 
-    # noinspection PyUnusedLocal
-    def create_song_widgets(self, *args):
+    def create_song_widgets(self, *_args):
         mod_pv_db_scanner = ModPvDbScanner(self.mod_directory_var.get())
         songs = mod_pv_db_scanner.get_all_songs()
 
         song_packs = set()
-        selected_pack = self.song_pack_filter_var.get()
 
         progress_bar = ProgressBar(self.bottom_bar_frame, len(songs), self.winfo_width())
 
@@ -141,8 +137,7 @@ class MainUI(customtkinter.CTk):
         #  TODO: Find a way to un-cringe this (using protected field)
         self.songs_checkbox_frame._parent_canvas.yview_moveto(0)
 
-    # noinspection PyUnusedLocal
-    def filter_song_widgets_by_song_pack(self, *args):
+    def filter_song_widgets_by_song_pack(self, *_args):
         selected_pack = self.song_pack_filter_var.get()
 
         if self.hidden_widgets:
@@ -162,6 +157,19 @@ class MainUI(customtkinter.CTk):
 
         #  TODO: Find a way to un-cringe this (using protected field)
         self.songs_checkbox_frame._parent_canvas.yview_moveto(0)
+
+    def filter_song_widgets_by_search_term(self, *_args):
+        search_term = self.search_bar.get().lower()
+        selected_pack = self.song_pack_filter_var.get()
+
+        for index, song_widget in enumerate(self.song_widgets):
+            if selected_pack == "All" and search_term in song_widget.checkbox.cget("text").lower():
+                song_widget.show(index, 0)
+            elif search_term in song_widget.checkbox.cget("text").lower()\
+                    and selected_pack == song_widget.song_pack_label.cget("text"):
+                song_widget.show(index, 0)
+            else:
+                song_widget.hide()
 
     def populate_song_pack_option_menu(self, song_packs: set[str]):
         self.song_pack_filter_optionmenu.configure(
@@ -187,5 +195,5 @@ class MainUI(customtkinter.CTk):
         song.state = checkbox_state
         song.update_state()
 
-    def dynamic_search(self, event):
-        self.filter_song_widgets_by_song_pack()
+    def dynamic_search(self, _event):
+        self.filter_song_widgets_by_search_term()
