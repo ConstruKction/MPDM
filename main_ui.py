@@ -44,7 +44,9 @@ class MainUI(customtkinter.CTk):
         self.song_pack_filter_optionmenu = customtkinter.CTkOptionMenu(
             self, variable=self.song_pack_filter_var, values=[]
         )
-        self.song_pack_filter_var.trace_variable("w", self.filter_song_widgets_by_song_pack)
+        self.song_pack_filter_var.trace_variable(
+            "w", self.filter_song_widgets_by_song_pack
+        )
 
         # Song Checklist Frame
         self.songs_checkbox_frame = customtkinter.CTkScrollableFrame(master=self)
@@ -114,7 +116,9 @@ class MainUI(customtkinter.CTk):
 
         song_packs = set()
 
-        progress_bar = ProgressBar(self.bottom_bar_frame, len(songs), self.winfo_width())
+        progress_bar = ProgressBar(
+            self.bottom_bar_frame, len(songs), self.winfo_width()
+        )
 
         for index, song in enumerate(songs):
             checkbox_var = customtkinter.IntVar(value=song.state)
@@ -148,7 +152,9 @@ class MainUI(customtkinter.CTk):
 
         if selected_pack != "All":
             song_filter = SongFilter()
-            filtered_song_widgets = song_filter.filter_out_song_pack(self.song_widgets, selected_pack)
+            filtered_song_widgets = song_filter.filter_out_song_pack(
+                self.song_widgets, selected_pack
+            )
 
             for song_widget in filtered_song_widgets:
                 song_widget.hide()
@@ -163,10 +169,14 @@ class MainUI(customtkinter.CTk):
         selected_pack = self.song_pack_filter_var.get()
 
         for index, song_widget in enumerate(self.song_widgets):
-            if selected_pack == "All" and search_term in song_widget.checkbox.cget("text").lower():
+            if (
+                selected_pack == "All"
+                and search_term in song_widget.checkbox.cget("text").lower()
+            ):
                 song_widget.show(index, 0)
-            elif search_term in song_widget.checkbox.cget("text").lower()\
-                    and selected_pack == song_widget.song_pack_label.cget("text"):
+            elif search_term in song_widget.checkbox.cget(
+                "text"
+            ).lower() and selected_pack == song_widget.song_pack_label.cget("text"):
                 song_widget.show(index, 0)
             else:
                 song_widget.hide()
