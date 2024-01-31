@@ -1,7 +1,17 @@
 from pathlib import Path
-from tkinter import filedialog, IntVar
+from tkinter import filedialog
 
-import customtkinter
+from customtkinter import (
+    CTk,
+    IntVar,
+    StringVar,
+    CTkEntry,
+    CTkScrollableFrame,
+    CTkFrame,
+    CTkButton,
+    CTkComboBox,
+    CTkOptionMenu,
+)
 
 from mod_pv_db_scanner import ModPvDbScanner
 from song import Song
@@ -10,19 +20,19 @@ from ui_components.progress_bar import ProgressBar
 from ui_components.song_widget import SongWidget
 
 
-class MainUI(customtkinter.CTk):
+class MainUI(CTk):
     def __init__(self):
         super().__init__()
         self.title("MPDM")
         self.geometry(self.set_window_size())
         self.grid_columnconfigure(0, weight=1)
-        self.directory_paths_list = []  # For ComboBox dropdown memory
+        self.directory_paths_list = []
         self.song_widgets = []
         self.hidden_widgets = False
 
         # Path ComboBox
-        self.mod_directory_var = customtkinter.StringVar()
-        self.mod_directory_combobox = customtkinter.CTkComboBox(
+        self.mod_directory_var = StringVar()
+        self.mod_directory_combobox = CTkComboBox(
             self,
             variable=self.mod_directory_var,
             values=[],
@@ -30,18 +40,16 @@ class MainUI(customtkinter.CTk):
         )
 
         # Song Search Bar
-        self.search_bar = customtkinter.CTkEntry(self, placeholder_text="Search")
+        self.search_bar = CTkEntry(self, placeholder_text="Search")
         self.search_bar.bind("<KeyRelease>", self.filter_song_widgets_by_search_term)
 
         # Browse Button
-        self.browse_button = customtkinter.CTkButton(
-            self, text="Browse", command=self.browse_file
-        )
+        self.browse_button = CTkButton(self, text="Browse", command=self.browse_file)
 
         # Song Pack Filter OptionMenu
-        self.song_pack_filter_var = customtkinter.StringVar()
+        self.song_pack_filter_var = StringVar()
         self.song_pack_filter_var.set("All")
-        self.song_pack_filter_optionmenu = customtkinter.CTkOptionMenu(
+        self.song_pack_filter_optionmenu = CTkOptionMenu(
             self, variable=self.song_pack_filter_var, values=[]
         )
         self.song_pack_filter_var.trace_variable(
@@ -49,13 +57,13 @@ class MainUI(customtkinter.CTk):
         )
 
         # Song Checklist Frame
-        self.songs_checkbox_frame = customtkinter.CTkScrollableFrame(master=self)
+        self.songs_checkbox_frame = CTkScrollableFrame(master=self)
         self.songs_checkbox_frame.grid_columnconfigure(0, weight=1)
         self.songs_checkbox_frame.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(4, weight=1)
 
         # Bottom Bar Frame
-        self.bottom_bar_frame = customtkinter.CTkFrame(master=self, height=9)
+        self.bottom_bar_frame = CTkFrame(master=self, height=9)
         self.bottom_bar_frame.grid_rowconfigure(0, weight=1)
         self.bottom_bar_frame.grid_columnconfigure(0, weight=1)
 
@@ -121,7 +129,7 @@ class MainUI(customtkinter.CTk):
         )
 
         for index, song in enumerate(songs):
-            checkbox_var = customtkinter.IntVar(value=song.state)
+            checkbox_var = IntVar(value=song.state)
             song_widget = SongWidget(
                 self.songs_checkbox_frame,
                 song,

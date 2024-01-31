@@ -1,7 +1,6 @@
-from tkinter import IntVar
 from typing import Any, Callable, Optional
 
-from customtkinter import CTkCheckBox, CTkLabel
+from customtkinter import IntVar, CTkCheckBox, CTkLabel
 
 from song import Song
 
