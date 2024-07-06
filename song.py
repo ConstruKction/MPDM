@@ -9,14 +9,18 @@ class Song:
         name: str,
         line_number_en: int,
         line_number_jp: int,
+        difficulty_ex: float,
+        difficulty_extra: float,
         mod_pv_db_path: Path,
         state: int,
-        pack: str
+        pack: str,
     ):
         self.pv_id = pv_id
         self.name = name
         self.line_number_en = line_number_en
         self.line_number_jp = line_number_jp
+        self.difficulty_ex = difficulty_ex
+        self.difficulty_extra = difficulty_extra
         self.mod_pv_db_path = mod_pv_db_path
         self.state = state
         self.pack = pack
