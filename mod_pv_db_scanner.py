@@ -52,11 +52,13 @@ class ModPvDbScanner:
 
                     # Find the start of the current song block by searching for the first blank line
                     start_line_number = song_title_line_number
-                    while start_line_number > 0 and lines[start_line_number].strip():
+                    while start_line_number > 0 and lines[start_line_number].startswith(
+                        pv_id
+                    ):
                         start_line_number -= 1
 
                     difficulty_ex, difficulty_extra = self.get_song_difficulty(
-                        lines, start_line_number + 1
+                        pv_id, lines, start_line_number + 1
                     )
 
                     song = Song(
@@ -83,14 +85,14 @@ class ModPvDbScanner:
 
     @staticmethod
     def get_song_difficulty(
-        lines: list[str], start_line_number: int
+        pv_id: str, lines: list[str], start_line_number: int
     ) -> tuple[float, float]:
         difficulty_ex = None
         difficulty_extra = None
 
         # Search forward for the extreme.0.level from the start of the song block
         for line in lines[start_line_number:]:
-            if not line:  # Stop at blank line
+            if not line or not line.startswith(pv_id):
                 break
             match = re.search(PV_EX_RE, line)
             if match:
@@ -99,7 +101,7 @@ class ModPvDbScanner:
 
         # Search forward for the extreme.1.level from the start of the song block
         for line in lines[start_line_number:]:
-            if not line:  # Stop at blank line
+            if not line or not line.startswith(pv_id):
                 break
             match = re.search(PV_EXTRA_RE, line)
             if match:
