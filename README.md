@@ -1,6 +1,6 @@
 # MPDM - Mod_PV_DB Manager
 
-MPDM is a simple Python program with a graphical user interface (GUI) built using the `customtkinter` library. It helps manage your song select screen.
+MPDM is a simple Python program with a graphical user interface (GUI) built using the `customtkinter` library. It helps manage your song select screen. I also really hated building this so I'm not gonna update it anymore unless it's something minor.
 
 ## Features
 - It's slow as shit.
