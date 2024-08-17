@@ -10,3 +10,6 @@ MPDM is a simple Python program with a graphical user interface (GUI) built usin
 
 ## Notes
 If you use EDEN Project, don't expect MPDM to work. Kindly consider not using EDEN.
+
+## Preview
+![alt text](https://raw.githubusercontent.com/ConstruKction/MPDM/main/preview.png)
