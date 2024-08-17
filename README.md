@@ -6,4 +6,7 @@ MPDM is a simple Python program with a graphical user interface (GUI) built usin
 - It's slow as shit.
 - Browse and select a directory containing your MM+ mods.
 - View a list of songs from the selected mods.
-- Add/remove songs.
+- Enable/disable songs.
+
+## Notes
+If you use EDEN Project, don't expect MPDM to work. Kindly consider not using EDEN.
