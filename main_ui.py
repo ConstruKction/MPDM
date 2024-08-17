@@ -1,5 +1,6 @@
 from pathlib import Path
 from tkinter import filedialog
+from multiprocessing import Pool, cpu_count
 
 from customtkinter import (
     CTk,
@@ -29,6 +30,9 @@ class MainUI(CTk):
         self.directory_paths_list = []
         self.song_widgets = []
         self.hidden_widgets = False
+        self.songs = []
+        self.song_packs = set()
+        self.progress_bar = None
 
         # Path ComboBox
         self.mod_directory_var = StringVar()
@@ -120,15 +124,20 @@ class MainUI(CTk):
 
     def create_song_widgets(self, *_args):
         mod_pv_db_scanner = ModPvDbScanner(self.mod_directory_var.get())
-        songs = mod_pv_db_scanner.get_all_songs()
+        self.songs = mod_pv_db_scanner.get_all_songs()
 
-        song_packs = set()
-
-        progress_bar = ProgressBar(
-            self.bottom_bar_frame, len(songs), self.winfo_width()
+        self.song_packs = set()
+        self.progress_bar = ProgressBar(
+            self.bottom_bar_frame, len(self.songs), self.winfo_width()
         )
 
-        for index, song in enumerate(songs):
+        self._create_song_widgets_in_chunks(0, 5)
+
+    def _create_song_widgets_in_chunks(self, start_index: int, chunk_size: int):
+        end_index = min(start_index + chunk_size, len(self.songs))
+
+        for index in range(start_index, end_index):
+            song = self.songs[index]
             checkbox_var = IntVar(value=song.state)
             song_widget = SongWidget(
                 self.songs_checkbox_frame,
@@ -138,16 +147,15 @@ class MainUI(CTk):
             )
             song_widget.show(index, 0)
 
-            song_packs.add(song.pack)
+            self.song_packs.add(song.pack)
             self.song_widgets.append(song_widget)
+            self.progress_bar.update()
 
-            progress_bar.update()
-            self.update_idletasks()
-
-        self.populate_song_pack_option_menu(song_packs)
-
-        #  TODO: Find a way to un-cringe this (using protected field)
-        self.songs_checkbox_frame._parent_canvas.yview_moveto(0)
+        if end_index < len(self.songs):
+            self.after(100, self._create_song_widgets_in_chunks, end_index, chunk_size)
+        else:
+            self.populate_song_pack_option_menu(self.song_packs)
+            self.songs_checkbox_frame._parent_canvas.yview_moveto(0)
 
     def filter_song_widgets_by_song_pack(self, *_args):
         selected_pack = self.song_pack_filter_var.get()
@@ -169,7 +177,6 @@ class MainUI(CTk):
 
             self.hidden_widgets = True
 
-        #  TODO: Find a way to un-cringe this (using protected field)
         self.songs_checkbox_frame._parent_canvas.yview_moveto(0)
 
     def filter_song_widgets_by_search_term(self, *_args):
@@ -189,7 +196,6 @@ class MainUI(CTk):
             else:
                 song_widget.hide()
 
-        #  TODO: Find a way to un-cringe this (using protected field)
         self.songs_checkbox_frame._parent_canvas.yview_moveto(0)
 
     def populate_song_pack_option_menu(self, song_packs: set[str]):
